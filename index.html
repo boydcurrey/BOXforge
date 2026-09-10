@@ -11,6 +11,7 @@
   --accent:#e95b98;--cell-w:34px;--cell-h:48px;--radial:50px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body,button,.grid,.cell,.radial,.radial-item,.radial-actions{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 html,body{overscroll-behavior:none}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;min-height:100vh;padding:calc(16px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom));touch-action:manipulation}
 header{max-width:1180px;margin:0 auto 14px;display:flex;justify-content:space-between;align-items:end;gap:16px}
@@ -27,7 +28,7 @@ button:active{border-color:var(--accent);background:#34242d}button:disabled{opac
 .cell{width:var(--cell-w);height:var(--cell-h);display:grid;place-items:center;background:#111315;color:var(--fg);font-size:39px;line-height:1;border:0;border-right:1px solid rgba(255,255,255,.035);border-bottom:1px solid rgba(255,255,255,.035);border-radius:0;padding:0;position:relative;touch-action:none}
 .cell:active,.cell.target{background:#282126;outline:1px solid var(--accent);outline-offset:-1px}
 .output{white-space:pre;font-size:23px;line-height:1.06;background:#111315;padding:12px;border-radius:9px;min-height:100px;overflow:auto}
-.note{font-family:system-ui,-apple-system,sans-serif;color:#b5bac0;font-size:14px;line-height:1.45;margin:0}.flash{color:var(--accent)}
+.snapshots{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:10px}.snapshot{background:#111315;border:1px solid #34383d;border-radius:10px;padding:10px;min-width:0}.snapshot pre{margin:0 0 9px;white-space:pre;overflow:auto;font-size:15px;line-height:1.05;max-height:160px}.snapshot-meta{color:var(--muted);font-size:11px;margin-bottom:7px}.snapshot-actions{display:flex;gap:6px}.snapshot-actions button{padding:6px 9px;font-size:11px}.note{font-family:system-ui,-apple-system,sans-serif;color:#b5bac0;font-size:14px;line-height:1.45;margin:0}.flash{color:var(--accent)}
 .size-control{display:inline-flex;align-items:center;gap:5px;background:#191c1f;border:1px solid #34383d;border-radius:9px;padding:3px}
 .size-control button{padding:5px 9px;border-radius:6px}.size-readout{min-width:64px;text-align:center;color:#d7d9da}
 
@@ -37,7 +38,7 @@ button:active{border-color:var(--accent);background:#34242d}button:disabled{opac
 .radial{position:fixed;z-index:100;width:360px;height:410px;display:none;transform:translate(-50%,-50%);pointer-events:none;touch-action:none}
 .radial.open{display:block}
 .radial-orbit{position:absolute;left:0;top:0;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle at center,rgba(30,33,36,.97) 0 18%,rgba(20,22,24,.95) 19% 100%);box-shadow:0 18px 50px rgba(0,0,0,.45);pointer-events:none}
-.radial-item{position:absolute;left:50%;top:50%;width:var(--radial);height:var(--radial);margin-left:calc(var(--radial)/-2);margin-top:calc(var(--radial)/-2);padding:0;border-radius:50%;font-size:28px;display:grid;place-items:center;background:#23272b;border:1px solid #454b51;transform:translate(var(--x),var(--y));box-shadow:0 3px 10px rgba(0,0,0,.25);pointer-events:none}
+.radial-item{position:absolute;left:50%;top:50%;width:var(--radial);height:var(--radial);margin-left:calc(var(--radial)/-2);margin-top:calc(var(--radial)/-2);padding:0;border-radius:50%;font-size:28px;display:grid;place-items:center;background:#23272b;border:1px solid #454b51;transform:translate(var(--x),var(--y));box-shadow:0 3px 10px rgba(0,0,0,.25);pointer-events:auto;touch-action:none}
 .radial-item.hot{background:#553041;border-color:var(--accent);transform:translate(var(--x),var(--y)) scale(1.12)}
 .radial-center{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px;border-radius:50%;display:grid;place-items:center;text-align:center;background:#191c1f;border:1px solid #4a5056;pointer-events:none}
 .radial-center strong{font-size:29px;line-height:1}.radial-center span{font-size:9px;color:var(--muted);display:block}
@@ -59,12 +60,13 @@ button:active{border-color:var(--accent);background:#34242d}button:disabled{opac
     <strong>Grid</strong>
     <span class="size-control"><span>W</span><button id="wMinus">−</button><button id="wPlus">+</button><span>H</span><button id="hMinus">−</button><button id="hPlus">+</button><span class="size-readout" id="sizeReadout"></span></span>
     <button id="undo">Undo</button><button id="redo">Redo</button>
-    <button id="clearAll">Clear all</button><button id="demo">Load demo</button><button id="copyText">Copy text</button>
+    <button id="clearAll">Clear all</button><button id="demo">Load demo</button><button id="copyText">Copy text</button><button id="pasteText">Paste text</button><button id="snapshotBtn">Snapshot</button>
     <span class="status" id="saveStatus">ready</span>
   </div>
   <div class="grid-wrap"><div class="grid" id="grid" aria-label="Box drawing character grid"></div></div>
 </section>
 <section class="panel"><strong>Plain-text output</strong><div class="output" id="output"></div></section>
+<section class="panel"><div class="toolbar"><strong>Scratchpad history</strong><span class="status" id="snapshotCount"></span></div><div id="snapshots" class="snapshots"></div></section>
 <section class="panel"><p class="note"><strong>Press and hold a grid cell</strong>, slide onto the desired box-drawing character, then release to place it. A quick tap opens the same selector for tap-to-pick fallback. CUT/COPY/PASTE/CLEAR act on the active cell. Grid width and height can be changed with the controls above; content is preserved where possible. Every edit is saved automatically.</p></section>
 </main>
 
@@ -83,7 +85,7 @@ const KEY='boxforge-state-v3';
 const OLDKEY='boxforge-grid-v2';
 let cells=[];
 let clipChar=' ';
-let undoStack=[],redoStack=[];
+let undoStack=[],redoStack=[],snapshots=[];
 let activeIndex=null, radialCenter={x:0,y:0}, hotChar=null, holdTimer=null, pointerDown=false, radialOpenedByHold=false;
 
 const grid=document.querySelector('#grid'), output=document.querySelector('#output'), status=document.querySelector('#saveStatus');
@@ -93,10 +95,10 @@ const radialCurrent=document.querySelector('#radialCurrent'), radialCellLabel=do
 // Positions mirror the "box" logic: lines on cardinal axes, corners on diagonals,
 // tees at the outer cardinal points, cross in the centre.
 const RADIAL_LAYOUT=[
-  {ch:'┴',x:0,y:-145},{ch:'│',x:0,y:-98},{ch:'│',x:0,y:-54},
-  {ch:'┤',x:-145,y:0},{ch:'─',x:-98,y:0},{ch:'─',x:-54,y:0},
-  {ch:'├',x:145,y:0},{ch:'─',x:98,y:0},{ch:'─',x:54,y:0},
-  {ch:'┬',x:0,y:145},{ch:'│',x:0,y:98},{ch:'│',x:0,y:54},
+  {ch:'┴',x:0,y:-145},{ch:'╵',x:0,y:-98},{ch:'│',x:0,y:-54},
+  {ch:'┤',x:-145,y:0},{ch:'╴',x:-98,y:0},{ch:'─',x:-54,y:0},
+  {ch:'├',x:145,y:0},{ch:'╶',x:98,y:0},{ch:'─',x:54,y:0},
+  {ch:'┬',x:0,y:145},{ch:'╷',x:0,y:98},{ch:'│',x:0,y:54},
   {ch:'┌',x:-103,y:-103},{ch:'╭',x:-68,y:-68},
   {ch:'┐',x:103,y:-103},{ch:'╮',x:68,y:-68},
   {ch:'└',x:-103,y:103},{ch:'╰',x:-68,y:68},
@@ -108,13 +110,13 @@ function load(){
   try{
     const s=JSON.parse(localStorage.getItem(KEY));
     if(s&&Number.isInteger(s.w)&&Number.isInteger(s.h)&&Array.isArray(s.cells)){
-      W=s.w;H=s.h;cells=s.cells.slice(0,W*H);while(cells.length<W*H)cells.push(' ');clipChar=s.clipChar||' ';return;
+      W=s.w;H=s.h;cells=s.cells.slice(0,W*H);while(cells.length<W*H)cells.push(' ');clipChar=s.clipChar||' ';snapshots=Array.isArray(s.snapshots)?s.snapshots:[];return;
     }
   }catch(e){}
   try{const old=JSON.parse(localStorage.getItem(OLDKEY));if(Array.isArray(old)){W=6;H=5;cells=old.slice(0,W*H);return}}catch(e){}
   cells=Array(W*H).fill(' ');
 }
-function save(){localStorage.setItem(KEY,JSON.stringify({w:W,h:H,cells,clipChar}));status.textContent='saved';status.classList.add('flash');setTimeout(()=>status.classList.remove('flash'),220)}
+function save(){localStorage.setItem(KEY,JSON.stringify({w:W,h:H,cells,clipChar,snapshots}));status.textContent='saved';status.classList.add('flash');setTimeout(()=>status.classList.remove('flash'),220)}
 function cloneState(){return {w:W,h:H,cells:cells.slice()}}
 function restoreState(s){W=s.w;H=s.h;cells=s.cells.slice();save();render()}
 function pushUndo(){undoStack.push(cloneState());if(undoStack.length>100)undoStack.shift();redoStack=[];updateUndoButtons()}
@@ -130,14 +132,49 @@ function render(){
     b.addEventListener('pointermove',cellPointerMove);b.addEventListener('pointerup',cellPointerUp);b.addEventListener('pointercancel',cellPointerCancel);
     grid.appendChild(b);
   });
-  output.textContent=textGrid()||'(empty)';document.querySelector('#sizeReadout').textContent=`${W} × ${H}`;updateUndoButtons();
+  output.textContent=textGrid()||'(empty)';document.querySelector('#sizeReadout').textContent=`${W} × ${H}`;updateUndoButtons();renderSnapshots();
 }
 function buildRadial(){
   orbit.innerHTML='';
   RADIAL_LAYOUT.forEach(({ch,x,y})=>{
-    const b=document.createElement('button');b.className='radial-item';b.textContent=ch;b.dataset.char=ch;b.style.setProperty('--x',`${x}px`);b.style.setProperty('--y',`${y}px`);orbit.appendChild(b);
+    const b=document.createElement('button');b.className='radial-item';b.textContent=ch;b.dataset.char=ch;b.style.setProperty('--x',`${x}px`);b.style.setProperty('--y',`${y}px`);
+    b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation()});
+    b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();placeChar(ch)});
+    orbit.appendChild(b);
   });
 }
+
+function loadTextDesign(text){
+  text=String(text??'').replace(/\r/g,'');
+  let rows=text.split('\n');
+  while(rows.length>1 && rows[rows.length-1]==='')rows.pop();
+  if(!rows.length)rows=[''];
+  const newH=Math.max(2,Math.min(24,rows.length));
+  const newW=Math.max(2,Math.min(32,Math.max(0,...rows.map(r=>[...r].length))));
+  pushUndo();W=newW;H=newH;cells=Array(W*H).fill(' ');
+  rows.slice(0,H).forEach((row,r)=>[...row].slice(0,W).forEach((ch,c)=>cells[r*W+c]=ch));
+  save();render();
+}
+function makeSnapshot(){
+  const snap={id:Date.now(),w:W,h:H,text:Array.from({length:H},(_,r)=>cells.slice(r*W,(r+1)*W).join('')).join('\n'),created:new Date().toISOString()};
+  snapshots.unshift(snap);if(snapshots.length>40)snapshots.pop();save();renderSnapshots();status.textContent='snapshot saved';
+}
+function renderSnapshots(){
+  const host=document.querySelector('#snapshots'), count=document.querySelector('#snapshotCount');if(!host)return;
+  count.textContent=`${snapshots.length} saved`;host.innerHTML='';
+  if(!snapshots.length){host.innerHTML='<small>No snapshots yet.</small>';return}
+  snapshots.forEach((snap,i)=>{
+    const card=document.createElement('div');card.className='snapshot';
+    const meta=document.createElement('div');meta.className='snapshot-meta';meta.textContent=`${snap.w} × ${snap.h} · ${new Date(snap.created).toLocaleString()}`;
+    const pre=document.createElement('pre');pre.textContent=snap.text;
+    const acts=document.createElement('div');acts.className='snapshot-actions';
+    const load=document.createElement('button');load.textContent='LOAD';load.onclick=()=>loadTextDesign(snap.text);
+    const copy=document.createElement('button');copy.textContent='COPY';copy.onclick=async()=>{try{await navigator.clipboard.writeText(snap.text);status.textContent='snapshot copied'}catch(e){status.textContent='copy blocked'}};
+    const del=document.createElement('button');del.textContent='DELETE';del.onclick=()=>{snapshots.splice(i,1);save();renderSnapshots()};
+    acts.append(load,copy,del);card.append(meta,pre,acts);host.appendChild(card);
+  });
+}
+
 function radialItemCenters(){return [...orbit.querySelectorAll('.radial-item')].map(el=>{const r=el.getBoundingClientRect();return {el,ch:el.dataset.char,x:r.left+r.width/2,y:r.top+r.height/2}})}
 function openRadial(index,cellEl,byHold=false){
   activeIndex=index;radialOpenedByHold=byHold;
@@ -165,6 +202,7 @@ function pasteActive(){if(activeIndex===null)return;pushUndo();cells[activeIndex
 
 function cellPointerDown(e,index,el){
   if(e.pointerType==='mouse'&&e.button!==0)return;
+  e.preventDefault();
   pointerDown=true;radialOpenedByHold=false;hotChar=null;el.setPointerCapture?.(e.pointerId);
   holdTimer=setTimeout(()=>{if(pointerDown){openRadial(index,el,true);updateHot(e.clientX,e.clientY)}},170);
 }
@@ -189,6 +227,8 @@ wMinus.onclick=()=>resizeGrid(W-1,H);wPlus.onclick=()=>resizeGrid(W+1,H);hMinus.
 clearAll.onclick=()=>{pushUndo();cells.fill(' ');save();render()};
 demo.onclick=()=>{pushUndo();W=7;H=5;const rows=['  ╭─   ','  │    ','╭─╯ ─╮','│    │','╰────╯'];cells=rows.map(r=>r.padEnd(W,' ').slice(0,W)).join('').split('');save();render()};
 copyText.onclick=async()=>{try{await navigator.clipboard.writeText(textGrid());status.textContent='copied text'}catch(e){status.textContent='copy blocked'}};
+pasteText.onclick=async()=>{try{const t=await navigator.clipboard.readText();loadTextDesign(t);status.textContent='pasted text'}catch(e){status.textContent='paste blocked'} };
+snapshotBtn.onclick=makeSnapshot;
 undo.onclick=()=>{if(!undoStack.length)return;redoStack.push(cloneState());restoreState(undoStack.pop())};
 redo.onclick=()=>{if(!redoStack.length)return;undoStack.push(cloneState());restoreState(redoStack.pop())};
 
