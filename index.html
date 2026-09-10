@@ -2,50 +2,172 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>WIREDforge — Proof of Concept</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>BOXforge</title>
 <style>
-:root{color-scheme:dark;--bg:#151719;--panel:#1d2023;--line:#34383d;--fg:#e7e7e2;--muted:#92979d;--accent:#e95b98;--cell:58px}
-*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--fg);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;min-height:100vh;padding:calc(18px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom))}
-header{max-width:900px;margin:0 auto 18px;display:flex;justify-content:space-between;align-items:end;gap:16px}h1{font-size:20px;margin:0;letter-spacing:.04em}small{color:var(--muted)}
-main{max-width:900px;margin:auto;display:grid;gap:14px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}button{font:inherit;color:var(--fg);background:#262a2e;border:1px solid #3a3f44;border-radius:9px;padding:10px 12px;touch-action:manipulation}button:active,.char.active{border-color:var(--accent);background:#34242d}.status{margin-left:auto;color:var(--muted);font-size:12px}
-.palette{display:grid;grid-template-columns:repeat(auto-fit,minmax(44px,1fr));gap:7px;margin-top:12px}.char{font-size:25px;padding:8px 4px;min-height:46px}
-.stage{overflow:auto}.grid{display:grid;grid-template-columns:repeat(6,var(--cell));grid-template-rows:repeat(5,var(--cell));gap:1px;width:max-content;margin:8px auto;background:#2d3135;border:1px solid #41464b}.cell{width:var(--cell);height:var(--cell);display:grid;place-items:center;background:#111315;font-size:39px;line-height:1;border:0;border-radius:0;padding:0}.cell:active{background:#282126}
-.output{white-space:pre;font-size:20px;line-height:1.25;background:#111315;padding:12px;border-radius:9px;min-height:90px;overflow:auto}.note{font-family:system-ui,-apple-system,sans-serif;color:#b5bac0;font-size:14px;line-height:1.45;margin:0}.flash{color:var(--accent)}
-@media(max-width:520px){:root{--cell:48px}.cell{font-size:32px}}
+:root{
+  color-scheme:dark;
+  --bg:#151719;--panel:#1d2023;--line:#34383d;--fg:#e7e7e2;--muted:#92979d;
+  --accent:#e95b98;--cell:62px;--radial:54px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{overscroll-behavior:none}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;min-height:100vh;padding:calc(18px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom));touch-action:manipulation}
+header{max-width:980px;margin:0 auto 18px;display:flex;justify-content:space-between;align-items:end;gap:16px}
+h1{font-size:21px;margin:0;letter-spacing:.04em}small{color:var(--muted)}
+main{max-width:980px;margin:auto;display:grid;gap:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button{font:inherit;color:var(--fg);background:#262a2e;border:1px solid #3a3f44;border-radius:9px;padding:10px 12px;touch-action:manipulation}
+button:active{border-color:var(--accent);background:#34242d}
+.status{margin-left:auto;color:var(--muted);font-size:12px}
+.stage{overflow:auto;position:relative}
+.grid{display:grid;grid-template-columns:repeat(6,var(--cell));grid-template-rows:repeat(5,var(--cell));gap:1px;width:max-content;margin:12px auto;background:#2d3135;border:1px solid #41464b;user-select:none}
+.cell{width:var(--cell);height:var(--cell);display:grid;place-items:center;background:#111315;font-size:41px;line-height:1;border:0;border-radius:0;padding:0;position:relative}
+.cell:active,.cell.target{background:#282126;outline:1px solid var(--accent);outline-offset:-1px}
+.output{white-space:pre;font-size:22px;line-height:1.25;background:#111315;padding:12px;border-radius:9px;min-height:110px;overflow:auto}
+.note{font-family:system-ui,-apple-system,sans-serif;color:#b5bac0;font-size:14px;line-height:1.5;margin:0}.flash{color:var(--accent)}
+
+/* Radial selector */
+.radial-backdrop{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.12);display:none}
+.radial-backdrop.open{display:block}
+.radial{position:fixed;z-index:100;width:320px;height:320px;display:none;transform:translate(-50%,-50%);pointer-events:none}
+.radial.open{display:block}
+.radial-orbit{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(255,255,255,.06);background:radial-gradient(circle at center,rgba(30,33,36,.96) 0 31%,rgba(20,22,24,.93) 32% 100%);box-shadow:0 18px 50px rgba(0,0,0,.45);pointer-events:auto}
+.radial-item{position:absolute;left:50%;top:50%;width:var(--radial);height:var(--radial);margin-left:calc(var(--radial)/-2);margin-top:calc(var(--radial)/-2);padding:0;border-radius:50%;font-size:29px;display:grid;place-items:center;background:#23272b;border:1px solid #454b51;transform:translate(var(--x),var(--y));box-shadow:0 3px 10px rgba(0,0,0,.25)}
+.radial-item:active{background:#422734;border-color:var(--accent)}
+.radial-center{position:absolute;left:50%;top:50%;width:82px;height:82px;margin:-41px;border-radius:50%;display:grid;place-items:center;text-align:center;background:#191c1f;border:1px solid #4a5056;pointer-events:auto}
+.radial-center strong{font-size:28px;line-height:1}.radial-center span{font-size:10px;color:var(--muted);margin-top:3px;display:block}
+.radial-erase{position:absolute;left:50%;top:50%;width:54px;height:32px;margin-left:-27px;margin-top:52px;border-radius:16px;padding:0;font-size:12px;background:#2b2326;border-color:#574047;pointer-events:auto}
+
+@media(max-width:620px){:root{--cell:52px;--radial:48px}.cell{font-size:34px}.radial{width:286px;height:286px}.radial-center{width:72px;height:72px;margin:-36px}.radial-erase{margin-top:47px}.panel{padding:13px}}
 </style>
 </head>
 <body>
-<header><div><h1>WIREDforge</h1><small>proof of concept · local persistence test</small></div><small id="clock"></small></header>
+<header>
+  <div><h1>BOXforge</h1><small>box-drawing editor · radial selector prototype</small></div>
+  <small id="clock"></small>
+</header>
 <main>
-<section class="panel">
- <div class="toolbar"><strong>Character</strong><span id="selectedLabel">╭</span><span class="status" id="saveStatus">ready</span></div>
- <div class="palette" id="palette"></div>
-</section>
 <section class="panel stage">
- <div class="toolbar"><strong>6 × 5 grid</strong><button id="clear">Clear</button><button id="demo">Load 6-ish demo</button><button id="copy">Copy text</button></div>
- <div class="grid" id="grid" aria-label="Box drawing character grid"></div>
+  <div class="toolbar">
+    <strong>6 × 5 grid</strong>
+    <button id="undo">Undo</button><button id="redo">Redo</button>
+    <button id="clear">Clear</button><button id="demo">Load demo</button><button id="copy">Copy text</button>
+    <span class="status" id="saveStatus">ready</span>
+  </div>
+  <div class="grid" id="grid" aria-label="Box drawing character grid"></div>
 </section>
 <section class="panel"><strong>Plain-text output</strong><div class="output" id="output"></div></section>
-<section class="panel"><p class="note">Tap a palette character, then tap grid cells to place it. Tap the selected character into an occupied cell to replace it. Choose ␠ to erase. The grid is saved automatically in this browser, so reload the page or switch apps and return to test persistence.</p></section>
+<section class="panel"><p class="note"><strong>Tap any grid cell</strong> to open the radial character selector at that cell. Tap a character to place it immediately. Tap <em>erase</em>, outside the selector, or press Escape to dismiss. Every edit is saved automatically in this browser.</p></section>
 </main>
+
+<div class="radial-backdrop" id="radialBackdrop"></div>
+<div class="radial" id="radial" role="dialog" aria-label="Box drawing character selector">
+  <div class="radial-orbit" id="radialOrbit"></div>
+  <div class="radial-center"><div><strong id="radialCurrent">·</strong><span id="radialCellLabel">cell</span></div></div>
+  <button class="radial-erase" id="radialErase">erase</button>
+</div>
+
 <script>
-const chars=['─','│','╭','╮','╰','╯','┌','┐','└','┘','├','┤','┬','┴','┼','╶','╴','╷','╵','·','␠'];
-const W=6,H=5,KEY='wiredforge-poc-grid-v1';
-let selected='╭';
+const W=6,H=5;
+const KEY='boxforge-grid-v2';
+const OLDKEY='wiredforge-poc-grid-v1';
+
+// Ordered by practical drawing frequency rather than Unicode order.
+const RADIAL_CHARS=[
+  '─','│','╭','╮','╯','╰','┌','┐','┘','└','├','┤','┬','┴','┼','╶','╴','╷','╵','·'
+];
+
 let cells;
 try{cells=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!Array.isArray(cells)||cells.length!==W*H){
+  try{cells=JSON.parse(localStorage.getItem(OLDKEY))}catch(e){}
+}
 if(!Array.isArray(cells)||cells.length!==W*H) cells=Array(W*H).fill(' ');
-const palette=document.querySelector('#palette'),grid=document.querySelector('#grid'),output=document.querySelector('#output'),status=document.querySelector('#saveStatus');
-function renderPalette(){palette.innerHTML='';chars.forEach(ch=>{const b=document.createElement('button');b.className='char'+(ch===selected?' active':'');b.textContent=ch;b.onclick=()=>{selected=ch;document.querySelector('#selectedLabel').textContent=ch;renderPalette()};palette.appendChild(b)})}
+
+const grid=document.querySelector('#grid');
+const output=document.querySelector('#output');
+const status=document.querySelector('#saveStatus');
+const radial=document.querySelector('#radial');
+const orbit=document.querySelector('#radialOrbit');
+const backdrop=document.querySelector('#radialBackdrop');
+const radialCurrent=document.querySelector('#radialCurrent');
+const radialCellLabel=document.querySelector('#radialCellLabel');
+let activeIndex=null;
+let undoStack=[],redoStack=[];
+
+function cloneCells(){return cells.slice()}
+function pushUndo(){undoStack.push(cloneCells());if(undoStack.length>100)undoStack.shift();redoStack=[];updateUndoButtons()}
+function updateUndoButtons(){document.querySelector('#undo').disabled=!undoStack.length;document.querySelector('#redo').disabled=!redoStack.length}
 function save(){localStorage.setItem(KEY,JSON.stringify(cells));status.textContent='saved';status.classList.add('flash');setTimeout(()=>status.classList.remove('flash'),250)}
-function textGrid(){let s='';for(let r=0;r<H;r++){s+=cells.slice(r*W,(r+1)*W).join('').replace(/ +$/,'')+(r<H-1?'\n':'')}return s}
-function render(){grid.innerHTML='';cells.forEach((ch,i)=>{const b=document.createElement('button');b.className='cell';b.textContent=ch;b.setAttribute('aria-label',`row ${Math.floor(i/W)+1}, column ${i%W+1}`);b.onclick=()=>{cells[i]=selected==='␠'?' ':selected;save();render()};grid.appendChild(b)});output.textContent=textGrid()||'(empty)'}
-document.querySelector('#clear').onclick=()=>{cells.fill(' ');save();render()};
-document.querySelector('#demo').onclick=()=>{cells=[...' ╭─   '+' │    '+'╭─╯ ─╮'+'│    │'+'╰────╯'];save();render()};
+function textGrid(){let rows=[];for(let r=0;r<H;r++)rows.push(cells.slice(r*W,(r+1)*W).join('').replace(/ +$/,''));return rows.join('\n')}
+function render(){
+  grid.innerHTML='';
+  cells.forEach((ch,i)=>{
+    const b=document.createElement('button');
+    b.className='cell'+(i===activeIndex?' target':'');
+    b.textContent=ch;
+    b.setAttribute('aria-label',`row ${Math.floor(i/W)+1}, column ${i%W+1}, ${ch===' '?'blank':ch}`);
+    b.addEventListener('click',e=>openRadial(i,b));
+    grid.appendChild(b);
+  });
+  output.textContent=textGrid()||'(empty)';
+  updateUndoButtons();
+}
+
+function buildRadial(){
+  orbit.innerHTML='';
+  const outer=12, inner=RADIAL_CHARS.length-outer;
+  RADIAL_CHARS.forEach((ch,i)=>{
+    const b=document.createElement('button');
+    b.className='radial-item';b.textContent=ch;b.dataset.char=ch;
+    const isOuter=i<outer;
+    const idx=isOuter?i:i-outer;
+    const count=isOuter?outer:inner;
+    const radius=isOuter?119:76;
+    const angle=(-90 + idx*(360/count))*Math.PI/180;
+    b.style.setProperty('--x',`${Math.cos(angle)*radius}px`);
+    b.style.setProperty('--y',`${Math.sin(angle)*radius}px`);
+    b.addEventListener('click',e=>{e.stopPropagation();placeChar(ch)});
+    orbit.appendChild(b);
+  });
+}
+
+function openRadial(index,cellEl){
+  activeIndex=index;
+  const r=cellEl.getBoundingClientRect();
+  // Clamp menu centre so the full radial remains visible on screen.
+  const pad=150;
+  const cx=Math.max(pad,Math.min(window.innerWidth-pad,r.left+r.width/2));
+  const cy=Math.max(pad,Math.min(window.innerHeight-pad,r.top+r.height/2));
+  radial.style.left=`${cx}px`;radial.style.top=`${cy}px`;
+  radialCurrent.textContent=cells[index]===' '?'·':cells[index];
+  radialCellLabel.textContent=`r${Math.floor(index/W)+1} c${index%W+1}`;
+  backdrop.classList.add('open');radial.classList.add('open');
+  render();
+}
+function closeRadial(){activeIndex=null;backdrop.classList.remove('open');radial.classList.remove('open');render()}
+function placeChar(ch){if(activeIndex===null)return;pushUndo();cells[activeIndex]=ch;save();closeRadial()}
+function eraseActive(){if(activeIndex===null)return;pushUndo();cells[activeIndex]=' ';save();closeRadial()}
+
+backdrop.addEventListener('click',closeRadial);
+document.querySelector('#radialErase').addEventListener('click',eraseActive);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeRadial()});
+
+document.querySelector('#clear').onclick=()=>{pushUndo();cells.fill(' ');save();render()};
+document.querySelector('#demo').onclick=()=>{
+  pushUndo();
+  const rows=[' ╭─   ',' │    ','╭─╯ ─╮','│    │','╰────╯'];
+  cells=rows.join('').split('');save();render();
+};
 document.querySelector('#copy').onclick=async()=>{try{await navigator.clipboard.writeText(textGrid());status.textContent='copied'}catch(e){status.textContent='copy blocked'}};
-function tick(){document.querySelector('#clock').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}tick();setInterval(tick,30000);
-renderPalette();render();
+document.querySelector('#undo').onclick=()=>{if(!undoStack.length)return;redoStack.push(cloneCells());cells=undoStack.pop();save();render()};
+document.querySelector('#redo').onclick=()=>{if(!redoStack.length)return;undoStack.push(cloneCells());cells=redoStack.pop();save();render()};
+
+function tick(){document.querySelector('#clock').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
+tick();setInterval(tick,30000);
+buildRadial();render();save();
 </script>
 </body>
 </html>
