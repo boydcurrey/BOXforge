@@ -8,166 +8,192 @@
 :root{
   color-scheme:dark;
   --bg:#151719;--panel:#1d2023;--line:#34383d;--fg:#e7e7e2;--muted:#92979d;
-  --accent:#e95b98;--cell:62px;--radial:54px;
+  --accent:#e95b98;--cell-w:34px;--cell-h:48px;--radial:50px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{overscroll-behavior:none}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;min-height:100vh;padding:calc(18px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom));touch-action:manipulation}
-header{max-width:980px;margin:0 auto 18px;display:flex;justify-content:space-between;align-items:end;gap:16px}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;min-height:100vh;padding:calc(16px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom));touch-action:manipulation}
+header{max-width:1180px;margin:0 auto 14px;display:flex;justify-content:space-between;align-items:end;gap:16px}
 h1{font-size:21px;margin:0;letter-spacing:.04em}small{color:var(--muted)}
-main{max-width:980px;margin:auto;display:grid;gap:14px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+main{max-width:1180px;margin:auto;display:grid;gap:12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
 .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-button{font:inherit;color:var(--fg);background:#262a2e;border:1px solid #3a3f44;border-radius:9px;padding:10px 12px;touch-action:manipulation}
-button:active{border-color:var(--accent);background:#34242d}
+button{font:inherit;color:var(--fg);background:#262a2e;border:1px solid #3a3f44;border-radius:9px;padding:9px 11px;touch-action:manipulation}
+button:active{border-color:var(--accent);background:#34242d}button:disabled{opacity:.4}
 .status{margin-left:auto;color:var(--muted);font-size:12px}
-.stage{overflow:auto;position:relative}
-.grid{display:grid;grid-template-columns:repeat(6,var(--cell));grid-template-rows:repeat(5,var(--cell));gap:1px;width:max-content;margin:12px auto;background:#2d3135;border:1px solid #41464b;user-select:none}
-.cell{width:var(--cell);height:var(--cell);display:grid;place-items:center;background:#111315;font-size:41px;line-height:1;border:0;border-radius:0;padding:0;position:relative}
+.stage{overflow:auto;position:relative;min-height:430px}
+.grid-wrap{display:flex;justify-content:center;align-items:flex-start;min-width:max-content;padding:10px}
+.grid{display:grid;gap:0;width:max-content;background:#111315;border:1px solid #41464b;user-select:none;touch-action:none}
+.cell{width:var(--cell-w);height:var(--cell-h);display:grid;place-items:center;background:#111315;color:var(--fg);font-size:39px;line-height:1;border:0;border-right:1px solid rgba(255,255,255,.035);border-bottom:1px solid rgba(255,255,255,.035);border-radius:0;padding:0;position:relative;touch-action:none}
 .cell:active,.cell.target{background:#282126;outline:1px solid var(--accent);outline-offset:-1px}
-.output{white-space:pre;font-size:22px;line-height:1.25;background:#111315;padding:12px;border-radius:9px;min-height:110px;overflow:auto}
-.note{font-family:system-ui,-apple-system,sans-serif;color:#b5bac0;font-size:14px;line-height:1.5;margin:0}.flash{color:var(--accent)}
+.output{white-space:pre;font-size:23px;line-height:1.06;background:#111315;padding:12px;border-radius:9px;min-height:100px;overflow:auto}
+.note{font-family:system-ui,-apple-system,sans-serif;color:#b5bac0;font-size:14px;line-height:1.45;margin:0}.flash{color:var(--accent)}
+.size-control{display:inline-flex;align-items:center;gap:5px;background:#191c1f;border:1px solid #34383d;border-radius:9px;padding:3px}
+.size-control button{padding:5px 9px;border-radius:6px}.size-readout{min-width:64px;text-align:center;color:#d7d9da}
 
 /* Radial selector */
-.radial-backdrop{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.12);display:none}
+.radial-backdrop{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.08);display:none;touch-action:none}
 .radial-backdrop.open{display:block}
-.radial{position:fixed;z-index:100;width:320px;height:320px;display:none;transform:translate(-50%,-50%);pointer-events:none}
+.radial{position:fixed;z-index:100;width:360px;height:410px;display:none;transform:translate(-50%,-50%);pointer-events:none;touch-action:none}
 .radial.open{display:block}
-.radial-orbit{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(255,255,255,.06);background:radial-gradient(circle at center,rgba(30,33,36,.96) 0 31%,rgba(20,22,24,.93) 32% 100%);box-shadow:0 18px 50px rgba(0,0,0,.45);pointer-events:auto}
-.radial-item{position:absolute;left:50%;top:50%;width:var(--radial);height:var(--radial);margin-left:calc(var(--radial)/-2);margin-top:calc(var(--radial)/-2);padding:0;border-radius:50%;font-size:29px;display:grid;place-items:center;background:#23272b;border:1px solid #454b51;transform:translate(var(--x),var(--y));box-shadow:0 3px 10px rgba(0,0,0,.25)}
-.radial-item:active{background:#422734;border-color:var(--accent)}
-.radial-center{position:absolute;left:50%;top:50%;width:82px;height:82px;margin:-41px;border-radius:50%;display:grid;place-items:center;text-align:center;background:#191c1f;border:1px solid #4a5056;pointer-events:auto}
-.radial-center strong{font-size:28px;line-height:1}.radial-center span{font-size:10px;color:var(--muted);margin-top:3px;display:block}
-.radial-erase{position:absolute;left:50%;top:50%;width:54px;height:32px;margin-left:-27px;margin-top:52px;border-radius:16px;padding:0;font-size:12px;background:#2b2326;border-color:#574047;pointer-events:auto}
+.radial-orbit{position:absolute;left:0;top:0;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle at center,rgba(30,33,36,.97) 0 18%,rgba(20,22,24,.95) 19% 100%);box-shadow:0 18px 50px rgba(0,0,0,.45);pointer-events:none}
+.radial-item{position:absolute;left:50%;top:50%;width:var(--radial);height:var(--radial);margin-left:calc(var(--radial)/-2);margin-top:calc(var(--radial)/-2);padding:0;border-radius:50%;font-size:28px;display:grid;place-items:center;background:#23272b;border:1px solid #454b51;transform:translate(var(--x),var(--y));box-shadow:0 3px 10px rgba(0,0,0,.25);pointer-events:none}
+.radial-item.hot{background:#553041;border-color:var(--accent);transform:translate(var(--x),var(--y)) scale(1.12)}
+.radial-center{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px;border-radius:50%;display:grid;place-items:center;text-align:center;background:#191c1f;border:1px solid #4a5056;pointer-events:none}
+.radial-center strong{font-size:29px;line-height:1}.radial-center span{font-size:9px;color:var(--muted);display:block}
+.radial-actions{position:absolute;left:50%;top:362px;transform:translateX(-50%);display:flex;gap:7px;pointer-events:auto}
+.radial-actions button{min-width:65px;padding:8px 8px;border-radius:18px;font-size:11px;background:#25282c}
+.radial-actions button.danger{background:#2b2326;border-color:#574047}
 
-@media(max-width:620px){:root{--cell:52px;--radial:48px}.cell{font-size:34px}.radial{width:286px;height:286px}.radial-center{width:72px;height:72px;margin:-36px}.radial-erase{margin-top:47px}.panel{padding:13px}}
+@media(max-width:620px){:root{--cell-w:31px;--cell-h:44px;--radial:46px}.cell{font-size:35px}.radial{width:326px;height:380px}.radial-orbit{width:326px;height:326px}.radial-actions{top:330px}.radial-actions button{min-width:58px;font-size:10px;padding:7px 6px}.panel{padding:12px}.stage{min-height:390px}}
 </style>
 </head>
 <body>
 <header>
-  <div><h1>BOXforge</h1><small>box-drawing editor · radial selector prototype</small></div>
+  <div><h1>BOXforge</h1><small>box-drawing editor · hold, slide, release</small></div>
   <small id="clock"></small>
 </header>
 <main>
 <section class="panel stage">
   <div class="toolbar">
-    <strong>6 × 5 grid</strong>
+    <strong>Grid</strong>
+    <span class="size-control"><span>W</span><button id="wMinus">−</button><button id="wPlus">+</button><span>H</span><button id="hMinus">−</button><button id="hPlus">+</button><span class="size-readout" id="sizeReadout"></span></span>
     <button id="undo">Undo</button><button id="redo">Redo</button>
-    <button id="clear">Clear</button><button id="demo">Load demo</button><button id="copy">Copy text</button>
+    <button id="clearAll">Clear all</button><button id="demo">Load demo</button><button id="copyText">Copy text</button>
     <span class="status" id="saveStatus">ready</span>
   </div>
-  <div class="grid" id="grid" aria-label="Box drawing character grid"></div>
+  <div class="grid-wrap"><div class="grid" id="grid" aria-label="Box drawing character grid"></div></div>
 </section>
 <section class="panel"><strong>Plain-text output</strong><div class="output" id="output"></div></section>
-<section class="panel"><p class="note"><strong>Tap any grid cell</strong> to open the radial character selector at that cell. Tap a character to place it immediately. Tap <em>erase</em>, outside the selector, or press Escape to dismiss. Every edit is saved automatically in this browser.</p></section>
+<section class="panel"><p class="note"><strong>Press and hold a grid cell</strong>, slide onto the desired box-drawing character, then release to place it. A quick tap opens the same selector for tap-to-pick fallback. CUT/COPY/PASTE/CLEAR act on the active cell. Grid width and height can be changed with the controls above; content is preserved where possible. Every edit is saved automatically.</p></section>
 </main>
 
 <div class="radial-backdrop" id="radialBackdrop"></div>
 <div class="radial" id="radial" role="dialog" aria-label="Box drawing character selector">
   <div class="radial-orbit" id="radialOrbit"></div>
   <div class="radial-center"><div><strong id="radialCurrent">·</strong><span id="radialCellLabel">cell</span></div></div>
-  <button class="radial-erase" id="radialErase">erase</button>
+  <div class="radial-actions">
+    <button id="actCut">CUT</button><button id="actCopy">COPY</button><button id="actPaste">PASTE</button><button class="danger" id="actClear">CLEAR</button>
+  </div>
 </div>
 
 <script>
-const W=6,H=5;
-const KEY='boxforge-grid-v2';
-const OLDKEY='wiredforge-poc-grid-v1';
+let W=8,H=6;
+const KEY='boxforge-state-v3';
+const OLDKEY='boxforge-grid-v2';
+let cells=[];
+let clipChar=' ';
+let undoStack=[],redoStack=[];
+let activeIndex=null, radialCenter={x:0,y:0}, hotChar=null, holdTimer=null, pointerDown=false, radialOpenedByHold=false;
 
-// Ordered by practical drawing frequency rather than Unicode order.
-const RADIAL_CHARS=[
-  '─','│','╭','╮','╯','╰','┌','┐','┘','└','├','┤','┬','┴','┼','╶','╴','╷','╵','·'
+const grid=document.querySelector('#grid'), output=document.querySelector('#output'), status=document.querySelector('#saveStatus');
+const radial=document.querySelector('#radial'), orbit=document.querySelector('#radialOrbit'), backdrop=document.querySelector('#radialBackdrop');
+const radialCurrent=document.querySelector('#radialCurrent'), radialCellLabel=document.querySelector('#radialCellLabel');
+
+// Positions mirror the "box" logic: lines on cardinal axes, corners on diagonals,
+// tees at the outer cardinal points, cross in the centre.
+const RADIAL_LAYOUT=[
+  {ch:'┴',x:0,y:-145},{ch:'│',x:0,y:-98},{ch:'│',x:0,y:-54},
+  {ch:'┤',x:-145,y:0},{ch:'─',x:-98,y:0},{ch:'─',x:-54,y:0},
+  {ch:'├',x:145,y:0},{ch:'─',x:98,y:0},{ch:'─',x:54,y:0},
+  {ch:'┬',x:0,y:145},{ch:'│',x:0,y:98},{ch:'│',x:0,y:54},
+  {ch:'┌',x:-103,y:-103},{ch:'╭',x:-68,y:-68},
+  {ch:'┐',x:103,y:-103},{ch:'╮',x:68,y:-68},
+  {ch:'└',x:-103,y:103},{ch:'╰',x:-68,y:68},
+  {ch:'┘',x:103,y:103},{ch:'╯',x:68,y:68},
+  {ch:'┼',x:0,y:0}
 ];
 
-let cells;
-try{cells=JSON.parse(localStorage.getItem(KEY))}catch(e){}
-if(!Array.isArray(cells)||cells.length!==W*H){
-  try{cells=JSON.parse(localStorage.getItem(OLDKEY))}catch(e){}
+function load(){
+  try{
+    const s=JSON.parse(localStorage.getItem(KEY));
+    if(s&&Number.isInteger(s.w)&&Number.isInteger(s.h)&&Array.isArray(s.cells)){
+      W=s.w;H=s.h;cells=s.cells.slice(0,W*H);while(cells.length<W*H)cells.push(' ');clipChar=s.clipChar||' ';return;
+    }
+  }catch(e){}
+  try{const old=JSON.parse(localStorage.getItem(OLDKEY));if(Array.isArray(old)){W=6;H=5;cells=old.slice(0,W*H);return}}catch(e){}
+  cells=Array(W*H).fill(' ');
 }
-if(!Array.isArray(cells)||cells.length!==W*H) cells=Array(W*H).fill(' ');
-
-const grid=document.querySelector('#grid');
-const output=document.querySelector('#output');
-const status=document.querySelector('#saveStatus');
-const radial=document.querySelector('#radial');
-const orbit=document.querySelector('#radialOrbit');
-const backdrop=document.querySelector('#radialBackdrop');
-const radialCurrent=document.querySelector('#radialCurrent');
-const radialCellLabel=document.querySelector('#radialCellLabel');
-let activeIndex=null;
-let undoStack=[],redoStack=[];
-
-function cloneCells(){return cells.slice()}
-function pushUndo(){undoStack.push(cloneCells());if(undoStack.length>100)undoStack.shift();redoStack=[];updateUndoButtons()}
-function updateUndoButtons(){document.querySelector('#undo').disabled=!undoStack.length;document.querySelector('#redo').disabled=!redoStack.length}
-function save(){localStorage.setItem(KEY,JSON.stringify(cells));status.textContent='saved';status.classList.add('flash');setTimeout(()=>status.classList.remove('flash'),250)}
+function save(){localStorage.setItem(KEY,JSON.stringify({w:W,h:H,cells,clipChar}));status.textContent='saved';status.classList.add('flash');setTimeout(()=>status.classList.remove('flash'),220)}
+function cloneState(){return {w:W,h:H,cells:cells.slice()}}
+function restoreState(s){W=s.w;H=s.h;cells=s.cells.slice();save();render()}
+function pushUndo(){undoStack.push(cloneState());if(undoStack.length>100)undoStack.shift();redoStack=[];updateUndoButtons()}
+function updateUndoButtons(){undo.disabled=!undoStack.length;redo.disabled=!redoStack.length}
 function textGrid(){let rows=[];for(let r=0;r<H;r++)rows.push(cells.slice(r*W,(r+1)*W).join('').replace(/ +$/,''));return rows.join('\n')}
 function render(){
+  grid.style.gridTemplateColumns=`repeat(${W},var(--cell-w))`;grid.style.gridTemplateRows=`repeat(${H},var(--cell-h))`;
   grid.innerHTML='';
   cells.forEach((ch,i)=>{
-    const b=document.createElement('button');
-    b.className='cell'+(i===activeIndex?' target':'');
-    b.textContent=ch;
+    const b=document.createElement('button');b.className='cell'+(i===activeIndex?' target':'');b.textContent=ch;
     b.setAttribute('aria-label',`row ${Math.floor(i/W)+1}, column ${i%W+1}, ${ch===' '?'blank':ch}`);
-    b.addEventListener('click',e=>openRadial(i,b));
+    b.addEventListener('pointerdown',e=>cellPointerDown(e,i,b));
+    b.addEventListener('pointermove',cellPointerMove);b.addEventListener('pointerup',cellPointerUp);b.addEventListener('pointercancel',cellPointerCancel);
     grid.appendChild(b);
   });
-  output.textContent=textGrid()||'(empty)';
-  updateUndoButtons();
+  output.textContent=textGrid()||'(empty)';document.querySelector('#sizeReadout').textContent=`${W} × ${H}`;updateUndoButtons();
 }
-
 function buildRadial(){
   orbit.innerHTML='';
-  const outer=12, inner=RADIAL_CHARS.length-outer;
-  RADIAL_CHARS.forEach((ch,i)=>{
-    const b=document.createElement('button');
-    b.className='radial-item';b.textContent=ch;b.dataset.char=ch;
-    const isOuter=i<outer;
-    const idx=isOuter?i:i-outer;
-    const count=isOuter?outer:inner;
-    const radius=isOuter?119:76;
-    const angle=(-90 + idx*(360/count))*Math.PI/180;
-    b.style.setProperty('--x',`${Math.cos(angle)*radius}px`);
-    b.style.setProperty('--y',`${Math.sin(angle)*radius}px`);
-    b.addEventListener('click',e=>{e.stopPropagation();placeChar(ch)});
-    orbit.appendChild(b);
+  RADIAL_LAYOUT.forEach(({ch,x,y})=>{
+    const b=document.createElement('button');b.className='radial-item';b.textContent=ch;b.dataset.char=ch;b.style.setProperty('--x',`${x}px`);b.style.setProperty('--y',`${y}px`);orbit.appendChild(b);
   });
 }
-
-function openRadial(index,cellEl){
-  activeIndex=index;
+function radialItemCenters(){return [...orbit.querySelectorAll('.radial-item')].map(el=>{const r=el.getBoundingClientRect();return {el,ch:el.dataset.char,x:r.left+r.width/2,y:r.top+r.height/2}})}
+function openRadial(index,cellEl,byHold=false){
+  activeIndex=index;radialOpenedByHold=byHold;
   const r=cellEl.getBoundingClientRect();
-  // Clamp menu centre so the full radial remains visible on screen.
-  const pad=150;
-  const cx=Math.max(pad,Math.min(window.innerWidth-pad,r.left+r.width/2));
-  const cy=Math.max(pad,Math.min(window.innerHeight-pad,r.top+r.height/2));
-  radial.style.left=`${cx}px`;radial.style.top=`${cy}px`;
-  radialCurrent.textContent=cells[index]===' '?'·':cells[index];
-  radialCellLabel.textContent=`r${Math.floor(index/W)+1} c${index%W+1}`;
+  const menuW=radial.getBoundingClientRect().width||360;const half=menuW/2+8;const actionsExtra=52;
+  const cx=Math.max(half,Math.min(window.innerWidth-half,r.left+r.width/2));
+  const cy=Math.max(half,Math.min(window.innerHeight-half-actionsExtra,r.top+r.height/2));
+  radialCenter={x:cx,y:cy};radial.style.left=`${cx}px`;radial.style.top=`${cy}px`;
+  radialCurrent.textContent=cells[index]===' '?'·':cells[index];radialCellLabel.textContent=`r${Math.floor(index/W)+1} c${index%W+1}`;
   backdrop.classList.add('open');radial.classList.add('open');
-  render();
+  [...grid.children].forEach((el,i)=>el.classList.toggle('target',i===activeIndex));
 }
-function closeRadial(){activeIndex=null;backdrop.classList.remove('open');radial.classList.remove('open');render()}
+function closeRadial(){clearHot();activeIndex=null;backdrop.classList.remove('open');radial.classList.remove('open');render()}
+function clearHot(){orbit.querySelectorAll('.radial-item.hot').forEach(el=>el.classList.remove('hot'));hotChar=null}
+function updateHot(clientX,clientY){
+  clearHot();let best=null,bestD=Infinity;
+  for(const it of radialItemCenters()){const d=Math.hypot(clientX-it.x,clientY-it.y);if(d<bestD){bestD=d;best=it}}
+  if(best&&bestD<42){best.el.classList.add('hot');hotChar=best.ch}
+}
 function placeChar(ch){if(activeIndex===null)return;pushUndo();cells[activeIndex]=ch;save();closeRadial()}
-function eraseActive(){if(activeIndex===null)return;pushUndo();cells[activeIndex]=' ';save();closeRadial()}
+function clearActive(){if(activeIndex===null)return;pushUndo();cells[activeIndex]=' ';save();closeRadial()}
+function copyActive(){if(activeIndex===null)return;clipChar=cells[activeIndex];save();status.textContent=`copied ${clipChar===' '?'blank':clipChar}`}
+function cutActive(){if(activeIndex===null)return;pushUndo();clipChar=cells[activeIndex];cells[activeIndex]=' ';save();closeRadial()}
+function pasteActive(){if(activeIndex===null)return;pushUndo();cells[activeIndex]=clipChar||' ';save();closeRadial()}
 
-backdrop.addEventListener('click',closeRadial);
-document.querySelector('#radialErase').addEventListener('click',eraseActive);
+function cellPointerDown(e,index,el){
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  pointerDown=true;radialOpenedByHold=false;hotChar=null;el.setPointerCapture?.(e.pointerId);
+  holdTimer=setTimeout(()=>{if(pointerDown){openRadial(index,el,true);updateHot(e.clientX,e.clientY)}},170);
+}
+function cellPointerMove(e){if(!pointerDown||!radial.classList.contains('open'))return;e.preventDefault();updateHot(e.clientX,e.clientY)}
+function cellPointerUp(e){
+  pointerDown=false;clearTimeout(holdTimer);
+  if(radial.classList.contains('open')&&radialOpenedByHold){e.preventDefault();if(hotChar)placeChar(hotChar);else closeRadial();return}
+  if(!radial.classList.contains('open'))openRadial(activeIndex??Number(e.currentTarget.dataset.index),e.currentTarget,false);
+}
+function cellPointerCancel(){pointerDown=false;clearTimeout(holdTimer);if(radialOpenedByHold)closeRadial()}
+
+// Fix quick-tap index resolution after render.
+function attachIndices(){[...grid.children].forEach((el,i)=>el.dataset.index=i)}
+const originalRender=render;render=function(){originalRender();attachIndices()};
+
+backdrop.addEventListener('pointerdown',e=>{if(e.target===backdrop)closeRadial()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeRadial()});
+actClear.onclick=clearActive;actCopy.onclick=copyActive;actCut.onclick=cutActive;actPaste.onclick=pasteActive;
 
-document.querySelector('#clear').onclick=()=>{pushUndo();cells.fill(' ');save();render()};
-document.querySelector('#demo').onclick=()=>{
-  pushUndo();
-  const rows=[' ╭─   ',' │    ','╭─╯ ─╮','│    │','╰────╯'];
-  cells=rows.join('').split('');save();render();
-};
-document.querySelector('#copy').onclick=async()=>{try{await navigator.clipboard.writeText(textGrid());status.textContent='copied'}catch(e){status.textContent='copy blocked'}};
-document.querySelector('#undo').onclick=()=>{if(!undoStack.length)return;redoStack.push(cloneCells());cells=undoStack.pop();save();render()};
-document.querySelector('#redo').onclick=()=>{if(!redoStack.length)return;undoStack.push(cloneCells());cells=redoStack.pop();save();render()};
+function resizeGrid(newW,newH){newW=Math.max(2,Math.min(32,newW));newH=Math.max(2,Math.min(24,newH));if(newW===W&&newH===H)return;pushUndo();const next=Array(newW*newH).fill(' ');for(let r=0;r<Math.min(H,newH);r++)for(let c=0;c<Math.min(W,newW);c++)next[r*newW+c]=cells[r*W+c];W=newW;H=newH;cells=next;save();render()}
+wMinus.onclick=()=>resizeGrid(W-1,H);wPlus.onclick=()=>resizeGrid(W+1,H);hMinus.onclick=()=>resizeGrid(W,H-1);hPlus.onclick=()=>resizeGrid(W,H+1);
+clearAll.onclick=()=>{pushUndo();cells.fill(' ');save();render()};
+demo.onclick=()=>{pushUndo();W=7;H=5;const rows=['  ╭─   ','  │    ','╭─╯ ─╮','│    │','╰────╯'];cells=rows.map(r=>r.padEnd(W,' ').slice(0,W)).join('').split('');save();render()};
+copyText.onclick=async()=>{try{await navigator.clipboard.writeText(textGrid());status.textContent='copied text'}catch(e){status.textContent='copy blocked'}};
+undo.onclick=()=>{if(!undoStack.length)return;redoStack.push(cloneState());restoreState(undoStack.pop())};
+redo.onclick=()=>{if(!redoStack.length)return;undoStack.push(cloneState());restoreState(redoStack.pop())};
 
-function tick(){document.querySelector('#clock').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
-tick();setInterval(tick,30000);
-buildRadial();render();save();
+function tick(){clock.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
+load();buildRadial();render();save();tick();setInterval(tick,30000);
 </script>
 </body>
 </html>
